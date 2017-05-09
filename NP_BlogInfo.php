@@ -12,7 +12,7 @@ class NP_BlogInfo extends NucleusPlugin {
 	function getName()      {return 'BlogInfo';}
 	function getEventList() {return array();}
 	function getAuthor()    {return 'Taka + cha_cya + ava + ephemera';}
-	function getURL()       {return 'http://japan.nucleuscms.org/bb/viewtopic.php?p=23237';}
+	function getURL()       {return 'http://japan.nucleuscms.org/bb/viewtopic.php?t=4185';}
 	function getVersion()   {return '0.2';}
 
 	function getDescription() {
