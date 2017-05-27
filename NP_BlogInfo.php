@@ -49,7 +49,8 @@ class NP_BlogInfo extends NucleusPlugin {
 		
 		$blog = $manager->getBlog($blogid);
 		
-		switch (strtolower($key)) {
+		$key = strtolower($key);
+		switch ($key) {
 			case 'blogid':
 			case 'id'    : return $blog->getID();
 			case 'name'  : return $blog->getName();
