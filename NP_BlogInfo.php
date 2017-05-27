@@ -58,6 +58,9 @@ class NP_BlogInfo extends NucleusPlugin {
 			case 'desc'  : return $blog->getDescription();
 			case 'short' : return $blog->getShortName();
 			case 'url'   : return $blog->getURL();
+			default:
+				$ex_path = $this->getDirectory() .'ex_'.$key.'.php';
+				if(is_file($ex_path)) return include($ex_path);
 		}
 	}
 	
