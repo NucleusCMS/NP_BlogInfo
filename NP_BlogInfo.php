@@ -11,9 +11,10 @@
 class NP_BlogInfo extends NucleusPlugin {
 	function getName()      {return 'BlogInfo';}
 	function getEventList() {return array();}
-	function getAuthor()    {return 'Taka + cha_cya + ava + ephemera';}
+	function getAuthor()    {return 'Taka + cha_cya + ava + ephemera + yamamoto';}
 	function getURL()       {return 'http://japan.nucleuscms.org/bb/viewtopic.php?t=4185';}
 	function getVersion()   {return '0.2';}
+	function supportsFeature($what) {return in_array($what,array('SqlTablePrefix'));}
 
 	function getDescription() {
 		// include language file for this plugin
@@ -24,44 +25,50 @@ class NP_BlogInfo extends NucleusPlugin {
 		return _BLOGINFO_Description;
 	}
 
-	function doSkinVar($skinType, $mode, $m_blogid='')  {$this->ModeSelect($skinType, $mode, $m_blogid, 1);}
-	function doTemplateVar(&$item, $mode, $m_blogid='') {$this->ModeSelect($item, $mode, $m_blogid, 0);}
+	function doSkinVar($skinType, $key, $other_blogid='', $option='')  {
+		global $blogid;
+		
+		if($other_blogid) $value = $this->getValue($key,$other_blogid);
+		else              $value = $this->getValue($key,$blogid);
+		
+		if($option) $value = $this->applyFilter($value,$option);
+		
+		echo $value;
+	}
+	function doTemplateVar(&$item, $key, $other_blogid='', $option='') {
+		if($other_blogid) $value = $this->getValue($key,$other_blogid);
+		else              $value = $this->getValue($key,getBlogIDFromItemID($item->itemid));
+		
+		if($option) $value = $this->applyFilter($value,$option);
+		
+		echo $value;
+	}
 
-	function ModeSelect($item, $mode, $m_blogid, $st) {
+	function getValue($key,$blogid,$option='') {
+		global $manager;
+		
+		$blog = $manager->getBlog($blogid);
+		
+		switch (strtolower($key)) {
+			case 'blogid':
+			case 'id'    : return $blog->getID();
+			case 'name'  : return $blog->getName();
+			case 'description':
+			case 'desc'  : return $blog->getDescription();
+			case 'short' : return $blog->getShortName();
+			case 'url'   : return $blog->getURL();
+		}
+	}
 	
-		global $CONF, $blogid, $manager, $member;
-
-		if($st) $bid = $blogid;
-		else {
-			$itemid = $item->itemid;
-			$bid = getBlogIDFromItemID($itemid);
+	
+	function applyFilter($value,$option='') {
+		switch($option) {
+			case 'htmlspecialchars_decode':
+			case 'hsc_decode':
+				return htmlspecialchars_decode($value);
+			default:
+				return $value;
 		}
 		
-		if($m_blogid) $bid = intval($m_blogid);
-
-		// blog infomation ----------
-		$b =& $manager->getBlog($bid);
-		switch ($mode) {
-			case 'id'   : echo $bid;break;
-			case 'name' : echo $b->getName();       break;
-			case 'desc' : echo $b->getDescription();break;
-			case 'short': echo $b->getShortName();  break;
-			case 'url'  : echo $b->getURL();        break;
-			default     : break;
-		}
-
-		// member infomation ----------
-		$m = new MEMBER;
-		$m->readFromID($bid);
-		if ($m){
-			switch ($mode) {
-				case 'mname'    : echo $m->getDisplayName();break;
-				case 'mrealname': echo $m->getRealName();   break;
-				case 'mnotes'   : echo $m->getNotes();      break;
-				case 'murl'     : echo $m->getURL();        break;
-				case 'memail'   : echo $m->getEmail();      break;
-				case 'mid'      : echo $m;                  break;
-			}
-		}
 	}
 }
