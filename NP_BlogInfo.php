@@ -25,8 +25,13 @@ class NP_BlogInfo extends NucleusPlugin {
 		return _BLOGINFO_Description;
 	}
 
-	function doSkinVar($skinType, $key, $other_blogid='', $option='')  {
+	function doSkinVar($skinType)  {
 		global $blogid;
+		
+		$p = func_get_args();
+		$key = $p[1];
+		$other_blogid = isset($p[2]) ? $p[2] : '';
+		$option       = isset($p[3]) ? $p[3] : '';
 		
 		if($other_blogid) $value = $this->getValue($key,$other_blogid);
 		else              $value = $this->getValue($key,$blogid);
@@ -35,7 +40,12 @@ class NP_BlogInfo extends NucleusPlugin {
 		
 		echo $value;
 	}
-	function doTemplateVar(&$item, $key, $other_blogid='', $option='') {
+	
+	function doTemplateVar(&$item) {
+		$p = func_get_args();
+		$key = $p[1];
+		$other_blogid = isset($p[2]) ? $p[2] : '';
+		$option       = isset($p[3]) ? $p[3] : '';
 		if($other_blogid) $value = $this->getValue($key,$other_blogid);
 		else              $value = $this->getValue($key,getBlogIDFromItemID($item->itemid));
 		
