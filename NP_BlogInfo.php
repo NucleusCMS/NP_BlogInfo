@@ -9,56 +9,62 @@
 */
 
 class NP_BlogInfo extends NucleusPlugin {
-	function getName()      {return 'BlogInfo';}
-	function getEventList() {return array();}
-	function getAuthor()    {return 'Taka + cha_cya + ava + ephemera + yamamoto';}
-	function getURL()       {return 'http://japan.nucleuscms.org/bb/viewtopic.php?t=4185';}
-	function getVersion()   {return '0.2';}
-	function supportsFeature($what) {return in_array($what,array('SqlTablePrefix'));}
+    public function getName()      {return 'BlogInfo';}
+    public function getEventList() {return array();}
+    public function getAuthor()    {return 'Taka + cha_cya + ava + ephemera + yamamoto';}
+    public function getURL()       {return 'http://japan.nucleuscms.org/bb/viewtopic.php?t=4185';}
+    public function getVersion()   {return '0.2';}
+    public function supportsFeature($what) {return $what === 'SqlTablePrefix';}
 
-	function getDescription() {
+	public function getDescription() {
 		// include language file for this plugin
 		$language = str_replace( array('/','\\'), '', getLanguageName());
 		$plg_path = $this->getDirectory();
-		if (is_file($plg_path.$language.'.php')) include_once($plg_path.$language.'.php');
-		else                                     include_once($plg_path.'english.php');
+		if (is_file($plg_path.$language.'.php')) {
+            include_once($plg_path . $language . '.php');
+        } else {
+            include_once($plg_path . 'english.php');
+        }
 		return _BLOGINFO_Description;
 	}
 
-	function doSkinVar($skinType)  {
-		global $blogid;
-		
+	public function doSkinVar($skinType)  {
 		$p = func_get_args();
-		$key = $p[1];
 		$other_blogid = isset($p[2]) ? $p[2] : '';
 		$option       = isset($p[3]) ? $p[3] : '';
 		
-		if($other_blogid) $value = $this->getValue($key,$other_blogid);
-		else              $value = $this->getValue($key,$blogid);
+        $value = $this->getValue(
+            $p[1],
+            $other_blogid ?: $GLOBALS['blogid']
+        );
 		
-		if($option) $value = $this->applyFilter($value,$option);
+		if($option) {
+            $value = $this->applyFilter($value, $option);
+        }
 		
 		echo $value;
 	}
 	
-	function doTemplateVar(&$item) {
+	public function doTemplateVar(&$item) {
 		$p = func_get_args();
-		$key = $p[1];
 		$other_blogid = isset($p[2]) ? $p[2] : '';
 		$option       = isset($p[3]) ? $p[3] : '';
-		if($other_blogid) $value = $this->getValue($key,$other_blogid);
-		else              $value = $this->getValue($key,getBlogIDFromItemID($item->itemid));
+        $value = $this->getValue(
+            $p[1],
+            $other_blogid ?: getBlogIDFromItemID($item->itemid)
+        );
 		
-		if($option) $value = $this->applyFilter($value,$option);
+		if($option) {
+            $value = $this->applyFilter($value, $option);
+        }
 		
 		echo $value;
 	}
 
-	function getValue($key,$blogid,$option='') {
+	private function getValue($key,$blogid,$option='') {
 		global $manager;
 		
 		$blog = $manager->getBlog($blogid);
-		
 		$key = strtolower($key);
 		switch ($key) {
 			case 'blogid':
@@ -68,21 +74,20 @@ class NP_BlogInfo extends NucleusPlugin {
 			case 'desc'  : return $blog->getDescription();
 			case 'short' : return $blog->getShortName();
 			case 'url'   : return $blog->getURL();
-			default:
-				$ex_path = $this->getDirectory() .'ex_'.$key.'.php';
-				if(is_file($ex_path)) return include($ex_path);
 		}
+        $ex_path = $this->getDirectory() .'ex_'.$key.'.php';
+        if(is_file($ex_path)) {
+            return include($ex_path);
+        }
+		return '';
 	}
-	
-	
-	function applyFilter($value,$option='') {
+
+	private function applyFilter($value,$option='') {
 		switch($option) {
 			case 'htmlspecialchars_decode':
 			case 'hsc_decode':
 				return htmlspecialchars_decode($value);
-			default:
-				return $value;
 		}
-		
+        return $value;
 	}
 }
